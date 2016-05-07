@@ -22,6 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends Activity implements TextToSpeech.OnInitListener {
@@ -33,6 +36,9 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
     private TextToSpeech tts;
     private BluetoothAdapter BTAdapter;
     private String product;
+    private List productList = new ArrayList<String>();
+    private String[] reyons = {"MELIH-PC", "SugaBook"};
+    private int i = 0;
     private final BroadcastReceiver bReciever = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -41,7 +47,8 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
                 if(device.getName()!=null){
-                    if(device.getName().equals("MELIH-PC")) {
+
+                    if(device.getName().equals(reyons[i])) {
 
                         txtSpeechInput.setText("Gidilecek reyon: " + device.getName() + " " + rssi);
 
@@ -72,6 +79,8 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        String[] list = {"süt","peynir","yoğurt","yumurta"};
+        Collections.addAll(productList, list);
         BTAdapter = BluetoothAdapter.getDefaultAdapter();
         txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
         tts = new TextToSpeech(this, this);
@@ -99,6 +108,10 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
             @Override
             public void onClick(View v) {
                 speakOut(product + " için 2 metre ilerleyiniz.",TextToSpeech.QUEUE_FLUSH);
+                if(productList.contains(product)) {
+                    i = 1;
+
+                }
                 if(BTAdapter.isDiscovering())
                     BTAdapter.cancelDiscovery();
 

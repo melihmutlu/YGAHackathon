@@ -158,7 +158,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             //Picture file
             ByteArrayOutputStream blob = new ByteArrayOutputStream();
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, blob);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, blob);
             byte[] bitmapdata = blob.toByteArray();
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);

@@ -1,11 +1,18 @@
 package com.frkn.ygahack;
 
+import android.util.Log;
+
 import org.json.JSONObject;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
+
+import javax.net.ssl.SSLContext;
 
 import cz.msebera.android.httpclient.client.HttpClient;
 import cz.msebera.android.httpclient.client.methods.HttpPost;
+import cz.msebera.android.httpclient.conn.scheme.Scheme;
+import cz.msebera.android.httpclient.conn.ssl.SSLSocketFactory;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.mime.HttpMultipartMode;
 import cz.msebera.android.httpclient.entity.mime.MultipartEntityBuilder;
@@ -33,6 +40,16 @@ public class OCR {
         JSONObject object=null;
         // Create a new HttpClient and Post Header
         HttpClient httpclient = new DefaultHttpClient();
+        SSLSocketFactory sf = null;
+        try {
+            sf = new SSLSocketFactory(
+                    SSLContext.getDefault(),
+                    SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        Scheme sch = new Scheme("https", 443, sf);
+        httpclient.getConnectionManager().getSchemeRegistry().register(sch);
         HttpPost httppost = new HttpPost("https://api.ocr.space/parse/image");
         //httppost.addHeader("apikey", "1007e8976188957");
         //httppost.addHeader("language", "tur");
@@ -63,7 +80,7 @@ public class OCR {
 
             try {
                 responseBody = EntityUtils.toString(httpclient.execute(httppost).getEntity(), "UTF-8");
-
+                Log.d("INFO",responseBody);
                 object = new JSONObject(responseBody);
 
             } catch (Exception e) {
