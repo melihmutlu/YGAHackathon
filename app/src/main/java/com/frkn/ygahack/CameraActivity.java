@@ -118,6 +118,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
      *
      * @return
      */
+    /*
     private Camera getCameraInstance() {
         Camera camera = null;
         try {
@@ -126,6 +127,25 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             // cannot get camera or does not exist
         }
         return camera;
+    }*/
+
+    private Camera getCameraInstance() {
+        int cameraCount = 0;
+        Camera cam = null;
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        cameraCount = Camera.getNumberOfCameras();
+        for ( int camIdx = 0; camIdx < cameraCount; camIdx++ ) {
+            Camera.getCameraInfo(camIdx, cameraInfo);
+            if ( cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK  ) {
+                try {
+                    cam = Camera.open(camIdx);
+                } catch (RuntimeException e) {
+                    Log.e("Camera", "Camera failed to open: " + e.getLocalizedMessage());
+                }
+            }
+        }
+
+        return cam;
     }
 
     Camera.PictureCallback mPicture = new Camera.PictureCallback() {

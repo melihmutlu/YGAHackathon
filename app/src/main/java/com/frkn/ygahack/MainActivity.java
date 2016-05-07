@@ -54,7 +54,6 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                             Intent i = new Intent(MainActivity.this, CameraActivity.class);
                             startActivity(i);
                         }else {
-                            speakOut("2 metre ilerleyiniz.",TextToSpeech.QUEUE_FLUSH);
                             BTAdapter.cancelDiscovery();
                         }
                     }
@@ -95,12 +94,11 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                     .show();
         }
 
-
         onayButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                speakOut(product + " için yol tarifi alınıyor", TextToSpeech.QUEUE_ADD);
+                speakOut(product + " için 2 metre ilerleyiniz.",TextToSpeech.QUEUE_FLUSH);
                 if(BTAdapter.isDiscovering())
                     BTAdapter.cancelDiscovery();
 
