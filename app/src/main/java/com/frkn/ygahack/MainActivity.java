@@ -48,9 +48,11 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                         //reyon bulundu unregister..
                         if(rssi > -50) {
                             unregisterReceiver(bReciever);
-                            speakOut(product + " ürünlerini ikinci ve üçüncü raflarda bulabilirsiniz",TextToSpeech.QUEUE_ADD);
+                            speakOut(product + " ürünlerini ikinci ve üçüncü raflarda bulabilirsiniz", TextToSpeech.QUEUE_ADD);
                             BTAdapter.cancelDiscovery();
-                            //TODO startActivity(kamera);
+                            //TODO startActivity(camera)
+                            Intent i = new Intent(MainActivity.this, CameraActivity.class);
+                            startActivity(i);
                         }else {
                             speakOut("2 metre ilerleyiniz.",TextToSpeech.QUEUE_FLUSH);
                             BTAdapter.cancelDiscovery();
