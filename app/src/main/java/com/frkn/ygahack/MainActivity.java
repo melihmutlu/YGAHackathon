@@ -1,6 +1,5 @@
 package com.frkn.ygahack;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
@@ -13,6 +12,7 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -24,7 +24,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class MainActivity extends Activity implements TextToSpeech.OnInitListener {
+public class MainActivity extends AppCompatActivity  implements TextToSpeech.OnInitListener {
 
     private TextView txtSpeechInput;
     private ImageButton btnSpeak;
@@ -188,6 +188,8 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
             Log.e("TTS", "Initilization Failed!");
         }
     }
+
+
 
     @Override
     public void onDestroy() {

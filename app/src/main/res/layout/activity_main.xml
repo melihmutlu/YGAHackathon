@@ -2,8 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bg_gradient"
     android:orientation="vertical">
+
 
     <TextView
         android:id="@+id/txtSpeechInput"
@@ -12,7 +14,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"
-        android:textColor="@color/white"
+        android:textColor="@color/primary_text"
         android:textSize="26dp"
         android:textStyle="normal"
         android:focusable="true"
@@ -23,27 +25,40 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="30dp"
         android:gravity="center"
         android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/main_text"
+            android:contentDescription="lütfen aradığınız ürünü yazınız"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:contentDescription="Sesli giriş"
+            android:id="@+id/btnSpeak"
+            android:src="@drawable/ic_microphone_black_24dp"/>
+
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnSpeak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
-            android:contentDescription="lütfen almak istediğiniz ürünü söyleyin"
-            android:src="@drawable/ico_mic" />
+            android:contentDescription="Onaylamak için dokunun"
+            android:src="@drawable/okbtn" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ONAYLA"
-            android:id="@+id/onayButton"
-            android:contentDescription="Onaylamak için çift dokunun"
-            android:visibility="gone"
 
-            />
     </LinearLayout>
 
 </RelativeLayout>
