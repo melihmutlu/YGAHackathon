@@ -41,9 +41,9 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
                 if(device.getName()!=null){
-                    if(device.getName().equals("LG_G2")) {
+                    if(device.getName().equals("MELIH-PC")) {
 
-                        //txtSpeechInput.setText("Gidilecek reyon: " + device.getName() + " " + rssi);
+                        txtSpeechInput.setText("Gidilecek reyon: " + device.getName() + " " + rssi);
 
                         //reyon bulundu unregister..
                         if(rssi > -50) {

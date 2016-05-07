@@ -3,6 +3,7 @@ package com.frkn.ygahack;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.Camera;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -23,6 +24,8 @@ public class CameraPreview extends SurfaceView implements
         super(context);
         this.mCamera = camera;
         this.mSurfaceHolder = this.getHolder();
+        if(mSurfaceHolder==null)
+            Log.d("INFO","surface yook");
         this.mSurfaceHolder.addCallback(this);
         this.mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }

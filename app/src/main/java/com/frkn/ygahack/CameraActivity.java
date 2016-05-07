@@ -5,6 +5,7 @@ import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -30,11 +31,12 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Melih on 7.5.2016.
  */
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends AppCompatActivity implements TextToSpeech.OnInitListener{
 
     private Camera mCamera;
     private CameraPreview mCameraPreview;
@@ -42,14 +44,19 @@ public class CameraActivity extends AppCompatActivity {
     private ImageView scanner , flashBtn;
     private Animation mAnimation;
     private boolean flash = false ;
-
+    private TextToSpeech tts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_layout);
         getSupportActionBar().hide();
         mCamera = getCameraInstance();
-        mCameraPreview = new CameraPreview(this, mCamera);
+        tts = new TextToSpeech(this, this);
+        if(mCamera!=null)
+            mCameraPreview = new CameraPreview(this, mCamera);
+        else
+            Log.d("INFO","Kamera yok hacıııı");
+
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         scanner = (ImageView) findViewById(R.id.scanner);
         preview.addView(mCameraPreview);
@@ -132,7 +139,7 @@ public class CameraActivity extends AppCompatActivity {
             //Picture file
             ByteArrayOutputStream blob = new ByteArrayOutputStream();
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, blob);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, blob);
             byte[] bitmapdata = blob.toByteArray();
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
@@ -160,6 +167,7 @@ public class CameraActivity extends AppCompatActivity {
                 return null;
             }
         }
+
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
                 .format(new Date());
@@ -219,12 +227,11 @@ public class CameraActivity extends AppCompatActivity {
                     else {
                         Log.d("INFO", jsonObject.getString("name"));
                         Toast.makeText(CameraActivity.this, jsonObject.getString("name"), Toast.LENGTH_LONG).show();
-
+                        speakOut(jsonObject.getString("name"), TextToSpeech.QUEUE_FLUSH);
                         String query = null;
                         try {
                             query = meaningful(jsonObject.getString("name"));
                             Log.d("meaningful",query);
-
 
                         } catch (Exception e) {
                             query = jsonObject.getString("name");
@@ -236,6 +243,9 @@ public class CameraActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
+        }
+        private void speakOut(String text, int mode) {
+            tts.speak(text, mode, null);
         }
         public String meaningful(String noisy){
             noisy = noisy.toLowerCase().replace("ç", "c");
@@ -364,5 +374,23 @@ public class CameraActivity extends AppCompatActivity {
         }
         in.close();
         return buf.toString();
+    }
+
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+
+            int result = tts.setLanguage(Locale.getDefault());
+
+            if (result == TextToSpeech.LANG_MISSING_DATA
+                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "This Language is not supported");
+            } else {
+                //btnSpeak.setEnabled(true);
+            }
+
+        } else {
+            Log.e("TTS", "Initilization Failed!");
+        }
     }
 }
