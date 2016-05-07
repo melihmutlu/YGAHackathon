@@ -1,14 +1,22 @@
 package com.frkn.ygahack;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,20 +29,89 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
     private TextView txtSpeechInput;
     private ImageButton btnSpeak;
     private final int REQ_CODE_SPEECH_INPUT = 100;
-
+    private Button onayButton;
     private TextToSpeech tts;
+    private BluetoothAdapter BTAdapter;
+    private String product;
+    private final BroadcastReceiver bReciever = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                Log.d("INFO", "cihaz bulundu");
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
+                if(device.getName()!=null){
+                    if(device.getName().equals("LG_G2")) {
 
+                        //txtSpeechInput.setText("Gidilecek reyon: " + device.getName() + " " + rssi);
+
+                        //reyon bulundu unregister..
+                        if(rssi > -50) {
+                            unregisterReceiver(bReciever);
+                            speakOut(product + " ürünlerini ikinci ve üçüncü raflarda bulabilirsiniz",TextToSpeech.QUEUE_ADD);
+                            BTAdapter.cancelDiscovery();
+                            //TODO startActivity(kamera);
+                        }else {
+                            speakOut("2 metre ilerleyiniz.",TextToSpeech.QUEUE_FLUSH);
+                            BTAdapter.cancelDiscovery();
+                        }
+                    }
+                }
+
+                Log.d("BLUETOOTH--", "Device: " + device.getName() + " " + rssi);
+            }else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
+                //sürekli devam
+                BTAdapter.startDiscovery();
+            }else if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)){
+
+            }
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        BTAdapter = BluetoothAdapter.getDefaultAdapter();
         txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
         tts = new TextToSpeech(this, this);
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
+        onayButton = (Button) findViewById(R.id.onayButton);
+
+        if(!BTAdapter.isEnabled())
+            BTAdapter.enable();
+
+        if (BTAdapter == null) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Not compatible")
+                    .setMessage("Your phone does not support Bluetooth")
+                    .setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            System.exit(0);
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+
+
+        onayButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                speakOut(product + " için yol tarifi alınıyor", TextToSpeech.QUEUE_ADD);
+                if(BTAdapter.isDiscovering())
+                    BTAdapter.cancelDiscovery();
+
+                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+                filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+                filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+                registerReceiver(bReciever, filter);
+                Log.d("INFO", "başladı ");
+                BTAdapter.startDiscovery();
+            }
+        });
 
         btnSpeak.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 promptSpeechInput();
@@ -71,13 +148,18 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
         switch (requestCode) {
             case REQ_CODE_SPEECH_INPUT: {
                 if (resultCode == RESULT_OK && null != data) {
-
                     ArrayList<String> result = data
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    txtSpeechInput.setText(result.get(0));
+                    product = result.get(0);
+                    txtSpeechInput.setText(product);
                     Log.d("TEXT", "Text Edited");
                     txtSpeechInput.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
-                    txtSpeechInput.requestFocus();
+                    txtSpeechInput.announceForAccessibility(txtSpeechInput.getText() + " onaylamak için çift dokunun.");
+                    speakOut(txtSpeechInput.getText().toString(), TextToSpeech.QUEUE_FLUSH);
+
+                    btnSpeak.setVisibility(View.GONE);
+                    onayButton.setVisibility(View.VISIBLE);
+
                 }
                 break;
             }
@@ -85,8 +167,8 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
         }
     }
 
-    private void speakOut(String text) {
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+    private void speakOut(String text, int mode) {
+        tts.speak(text, mode, null);
     }
 
     @Override
@@ -114,6 +196,10 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
             tts.stop();
             tts.shutdown();
         }
+        if(BTAdapter.isDiscovering())
+            BTAdapter.cancelDiscovery();
+
+        unregisterReceiver(bReciever);
         super.onDestroy();
     }
 }
