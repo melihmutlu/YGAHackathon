@@ -85,7 +85,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
                         }
                     }
                 });
-                captureButton.setClickable(false);
+                //captureButton.setClickable(false);
             }
         });
 
@@ -128,17 +128,16 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
         }
         return camera;
     }*/
-
     private Camera getCameraInstance() {
         int cameraCount = 0;
         Camera cam = null;
         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
         cameraCount = Camera.getNumberOfCameras();
         for ( int camIdx = 0; camIdx < cameraCount; camIdx++ ) {
-            Camera.getCameraInfo(camIdx, cameraInfo);
+            Camera.getCameraInfo( camIdx, cameraInfo );
             if ( cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK  ) {
                 try {
-                    cam = Camera.open(camIdx);
+                    cam = Camera.open( camIdx );
                 } catch (RuntimeException e) {
                     Log.e("Camera", "Camera failed to open: " + e.getLocalizedMessage());
                 }
@@ -159,7 +158,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             //Picture file
             ByteArrayOutputStream blob = new ByteArrayOutputStream();
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, blob);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, blob);
             byte[] bitmapdata = blob.toByteArray();
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
@@ -167,12 +166,13 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
                 fos.close();
 
                 mCameraPreview.getHolder().removeCallback(mCameraPreview);
-                camera.release();
+                //camera.release();
             } catch (FileNotFoundException e) {
 
             } catch (IOException e) {
             }
             new RequestTask().execute(pictureFile);
+            //new OCRTask().execute(pictureFile);
         }
     };
 
@@ -196,6 +196,41 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
                 + "IMG_" + timeStamp + ".jpg");
 
         return mediaFile;
+    }
+
+    class OCRTask extends AsyncTask<File,Void,JSONObject> {
+
+        @Override
+        protected void onPreExecute() {
+            scanner.setVisibility(View.VISIBLE);
+            mAnimation = new TranslateAnimation(
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0f,
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0f,
+                    TranslateAnimation.RELATIVE_TO_PARENT, -0.5f,
+                    TranslateAnimation.RELATIVE_TO_PARENT, 0.48f);
+            mAnimation.setDuration(3500);
+            mAnimation.setRepeatCount(-1);
+            mAnimation.setRepeatMode(Animation.REVERSE);
+            mAnimation.setInterpolator(new LinearInterpolator());
+            scanner.setAnimation(mAnimation);
+            super.onPreExecute();
+        }
+
+        @Override
+        protected JSONObject doInBackground(File... params) {
+            return OCR.getInstance().postImage(params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            try {
+                Log.d("INFO", "result: " + jsonObject.getJSONArray("ParsedResults").getJSONObject(0).getString("ParsedText"));
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            super.onPostExecute(jsonObject);
+        }
     }
 
     //Uploads the image , waits for result
@@ -412,5 +447,11 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
         } else {
             Log.e("TTS", "Initilization Failed!");
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        super.onBackPressed();
     }
 }
