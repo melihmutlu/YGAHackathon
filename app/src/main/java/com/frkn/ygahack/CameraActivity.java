@@ -85,7 +85,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
                         }
                     }
                 });
-                captureButton.setClickable(false);
+                //captureButton.setClickable(false);
             }
         });
 
@@ -166,13 +166,13 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
                 fos.close();
 
                 mCameraPreview.getHolder().removeCallback(mCameraPreview);
-                camera.release();
+                //camera.release();
             } catch (FileNotFoundException e) {
 
             } catch (IOException e) {
             }
-            //new RequestTask().execute(pictureFile);
-            new OCRTask().execute(pictureFile);
+            new RequestTask().execute(pictureFile);
+            //new OCRTask().execute(pictureFile);
         }
     };
 
@@ -447,5 +447,11 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
         } else {
             Log.e("TTS", "Initilization Failed!");
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        super.onBackPressed();
     }
 }
