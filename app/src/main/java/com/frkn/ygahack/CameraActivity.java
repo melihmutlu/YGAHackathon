@@ -16,7 +16,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -284,14 +282,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
                         Toast.makeText(CameraActivity.this, jsonObject.getString("name"), Toast.LENGTH_LONG).show();
                         speakOut(jsonObject.getString("name"), TextToSpeech.QUEUE_FLUSH);
                         String query = null;
-                        try {
-                            query = meaningful(jsonObject.getString("name"));
-                            Log.d("meaningful",query);
 
-                        } catch (Exception e) {
-                            query = jsonObject.getString("name");
-                            e.printStackTrace();
-                        }
                     }
                     super.onPostExecute(jsonObject);
                 } catch (JSONException e) {
@@ -302,113 +293,6 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
         private void speakOut(String text, int mode) {
             tts.speak(text, mode, null);
         }
-        public String meaningful(String noisy){
-            noisy = noisy.toLowerCase().replace("ç", "c");
-            noisy = noisy.replace("ğ", "g");
-            noisy = noisy.replace("ı", "i");
-            noisy = noisy.replace("ö", "o");
-            noisy = noisy.replace("ş", "s");
-            noisy = noisy.replace("ü", "u");
-            noisy = noisy.replace("ş", "s");
-            JSONArray color = null;
-            JSONArray gender = null;
-            JSONArray category = null;
-            JSONArray pattern = null;
-            JSONArray brand = null;
-            try {
-                color = new JSONArray(readFile("color.txt"));
-                gender = new JSONArray(readFile("gender.txt"));
-                category = new JSONArray(readFile("category.txt"));
-                pattern = new JSONArray(readFile("pattern.txt"));
-                brand = new JSONArray(readFile("brand.txt"));
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-            }
-            String colorString = "";
-            String genderString = "";
-            String categoryString = "";
-            String patternString = "";
-            String brandString = "";
-            try {
-                for (JSONObject o : bests(color, noisy)) {
-                    colorString += o.get("title") + " ";
-                }
-            } catch (Exception e) {
-
-            }
-            try {
-                for (JSONObject o : bests(pattern, noisy)) {
-                    patternString += o.get("title") + " ";
-                }
-            } catch (Exception e) {
-
-            }
-            try {
-                genderString = best(gender, noisy).get("title").toString()+" ";
-            } catch (Exception e) {
-
-            }
-            try {
-                categoryString = best(category, noisy).get("title").toString();
-            } catch (Exception e) {
-
-            }
-            try {
-                brandString = best(brand, noisy).get("title").toString() + " ";
-            } catch (Exception e) {
-
-            }
-            if (categoryString.isEmpty()) {
-                return noisy;
-            } else if (genderString.isEmpty() && colorString.isEmpty()
-                    && patternString.isEmpty() && brandString.isEmpty()) {
-                return noisy;
-            } else {
-                String all = colorString + genderString + patternString
-                        + brandString + categoryString;
-                return all;
-            }
-        }
-
-        JSONObject best(JSONArray array, String key) throws JSONException {
-            JSONObject best = new JSONObject();
-            int max = 0;
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject object = array.getJSONObject(i);
-                JSONArray objectArray = object.getJSONArray("keyword");
-                int length = 0;
-                for (int j = 0; j < objectArray.length(); j++) {
-                    if (key.contains(objectArray.get(j).toString())) {
-                        length++;
-                    }
-                }
-                if (length > max) {
-                    max = length;
-                    best = object;
-                }
-            }
-            return best;
-        }
-
-        ArrayList<JSONObject> bests(JSONArray array, String key) throws JSONException {
-            ArrayList<JSONObject> arList = new ArrayList<JSONObject>();
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject object = array.getJSONObject(i);
-                JSONArray objectArray = object.getJSONArray("keyword");
-                int length = 0;
-                for (int j = 0; j < objectArray.length(); j++) {
-                    if (key.contains(objectArray.get(j).toString())) {
-                        length++;
-                    }
-                }
-                if (length >= 1) {
-                    arList.add(object);
-                }
-            }
-            return arList;
-        }
-
-
 
         @Override
         protected JSONObject doInBackground(String... params) {
