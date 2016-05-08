@@ -16,8 +16,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,9 +27,9 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity  implements TextToSpeech.OnInitListener {
 
     private TextView txtSpeechInput;
-    private ImageButton btnSpeak;
+    private ImageButton onayButton;
+    private ImageView btnSpeak;
     private final int REQ_CODE_SPEECH_INPUT = 100;
-    private Button onayButton;
     private TextToSpeech tts;
     private BluetoothAdapter BTAdapter;
     private String product;
@@ -75,8 +75,8 @@ public class MainActivity extends AppCompatActivity  implements TextToSpeech.OnI
         BTAdapter = BluetoothAdapter.getDefaultAdapter();
         txtSpeechInput = (TextView) findViewById(R.id.txtSpeechInput);
         tts = new TextToSpeech(this, this);
-        btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
-        onayButton = (Button) findViewById(R.id.onayButton);
+        btnSpeak = (ImageView) findViewById(R.id.btnSpeak);
+        onayButton = (ImageButton) findViewById(R.id.onayButton);
 
         if(!BTAdapter.isEnabled())
             BTAdapter.enable();
@@ -157,7 +157,6 @@ public class MainActivity extends AppCompatActivity  implements TextToSpeech.OnI
                     txtSpeechInput.announceForAccessibility(txtSpeechInput.getText() + " onaylamak için çift dokunun.");
                     speakOut(txtSpeechInput.getText().toString(), TextToSpeech.QUEUE_FLUSH);
 
-                    btnSpeak.setVisibility(View.GONE);
                     onayButton.setVisibility(View.VISIBLE);
 
                 }

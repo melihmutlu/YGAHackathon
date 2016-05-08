@@ -21,42 +21,49 @@
         android:focusableInTouchMode="true"/>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="100dp"
         android:gravity="center"
         android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
         <EditText
             android:layout_width="match_parent"
+            android:id="@+id/editText"
             android:layout_height="wrap_content"
             android:hint="@string/main_text"
-            android:contentDescription="lütfen aradığınız ürünü yazınız"/>
+            android:contentDescription="lütfen aradığınız ürünü yazınız"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"/>
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
             android:contentDescription="Sesli giriş"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="16dp"
             android:id="@+id/btnSpeak"
+            android:paddingTop="9dp"
             android:src="@drawable/ic_microphone_black_24dp"/>
 
-        </LinearLayout>
+        </RelativeLayout>
 
         <ImageButton
-            android:id="@+id/btnSpeak"
+            android:id="@+id/onayButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="16dp"
             android:background="@null"
             android:contentDescription="Onaylamak için dokunun"
-            android:src="@drawable/okbtn" />
+            android:src="@drawable/okbtn"
+            android:visibility="invisible"/>
 
 
     </LinearLayout>
