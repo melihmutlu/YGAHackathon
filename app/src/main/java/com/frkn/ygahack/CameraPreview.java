@@ -47,6 +47,7 @@ public class CameraPreview extends SurfaceView implements
 
         } catch (IOException exception) {
             mCamera.release();
+            Log.d("INFO","catch at surfacecreated");
         }
 
     }
@@ -55,6 +56,7 @@ public class CameraPreview extends SurfaceView implements
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         mCamera.stopPreview();
         mCamera.release();
+        Log.d("INFO","Surface destroyed");
     }
 
     @Override

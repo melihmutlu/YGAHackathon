@@ -41,7 +41,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
     private Camera mCamera;
     private CameraPreview mCameraPreview;
     private File pictureFile;
-    private ImageView scanner , flashBtn;
+    private ImageView scanner , flashBtn, reqImageView;
     private Animation mAnimation;
     private boolean flash = false ;
     private TextToSpeech tts;
@@ -59,6 +59,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
 
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         scanner = (ImageView) findViewById(R.id.scanner);
+        reqImageView = (ImageView) findViewById(R.id.reqImageView);
         preview.addView(mCameraPreview);
 
 
@@ -159,14 +160,17 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             ByteArrayOutputStream blob = new ByteArrayOutputStream();
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 20, blob);
+            reqImageView.setImageBitmap(bitmap);
+            reqImageView.setRotation(90);
             byte[] bitmapdata = blob.toByteArray();
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(bitmapdata);
                 fos.close();
 
-                mCameraPreview.getHolder().removeCallback(mCameraPreview);
+                //mCameraPreview.getHolder().removeCallback(mCameraPreview);
                 //camera.release();
+                camera.startPreview();
             } catch (FileNotFoundException e) {
 
             } catch (IOException e) {
@@ -202,17 +206,18 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
 
         @Override
         protected void onPreExecute() {
-            scanner.setVisibility(View.VISIBLE);
+            /*scanner.setVisibility(View.VISIBLE);
             mAnimation = new TranslateAnimation(
                     TranslateAnimation.RELATIVE_TO_PARENT, 0f,
                     TranslateAnimation.RELATIVE_TO_PARENT, 0f,
                     TranslateAnimation.RELATIVE_TO_PARENT, -0.5f,
-                    TranslateAnimation.RELATIVE_TO_PARENT, 0.48f);
+            TranslateAnimation.RELATIVE_TO_PARENT, 0.48f);
             mAnimation.setDuration(3500);
             mAnimation.setRepeatCount(-1);
             mAnimation.setRepeatMode(Animation.REVERSE);
             mAnimation.setInterpolator(new LinearInterpolator());
             scanner.setAnimation(mAnimation);
+            */
             super.onPreExecute();
         }
 
@@ -238,7 +243,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
 
         @Override
         protected void onPreExecute() {
-            scanner.setVisibility(View.VISIBLE);
+            /*scanner.setVisibility(View.VISIBLE);
             mAnimation = new TranslateAnimation(
                     TranslateAnimation.RELATIVE_TO_PARENT, 0f,
                     TranslateAnimation.RELATIVE_TO_PARENT, 0f,
@@ -249,6 +254,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             mAnimation.setRepeatMode(Animation.REVERSE);
             mAnimation.setInterpolator(new LinearInterpolator());
             scanner.setAnimation(mAnimation);
+            */
             super.onPreExecute();
         }
 
@@ -283,15 +289,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
                         Log.d("INFO", jsonObject.getString("name"));
                         Toast.makeText(CameraActivity.this, jsonObject.getString("name"), Toast.LENGTH_LONG).show();
                         speakOut(jsonObject.getString("name"), TextToSpeech.QUEUE_FLUSH);
-                        String query = null;
-                        try {
-                            query = meaningful(jsonObject.getString("name"));
-                            Log.d("meaningful",query);
 
-                        } catch (Exception e) {
-                            query = jsonObject.getString("name");
-                            e.printStackTrace();
-                        }
                     }
                     super.onPostExecute(jsonObject);
                 } catch (JSONException e) {
@@ -302,113 +300,6 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
         private void speakOut(String text, int mode) {
             tts.speak(text, mode, null);
         }
-        public String meaningful(String noisy){
-            noisy = noisy.toLowerCase().replace("ç", "c");
-            noisy = noisy.replace("ğ", "g");
-            noisy = noisy.replace("ı", "i");
-            noisy = noisy.replace("ö", "o");
-            noisy = noisy.replace("ş", "s");
-            noisy = noisy.replace("ü", "u");
-            noisy = noisy.replace("ş", "s");
-            JSONArray color = null;
-            JSONArray gender = null;
-            JSONArray category = null;
-            JSONArray pattern = null;
-            JSONArray brand = null;
-            try {
-                color = new JSONArray(readFile("color.txt"));
-                gender = new JSONArray(readFile("gender.txt"));
-                category = new JSONArray(readFile("category.txt"));
-                pattern = new JSONArray(readFile("pattern.txt"));
-                brand = new JSONArray(readFile("brand.txt"));
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-            }
-            String colorString = "";
-            String genderString = "";
-            String categoryString = "";
-            String patternString = "";
-            String brandString = "";
-            try {
-                for (JSONObject o : bests(color, noisy)) {
-                    colorString += o.get("title") + " ";
-                }
-            } catch (Exception e) {
-
-            }
-            try {
-                for (JSONObject o : bests(pattern, noisy)) {
-                    patternString += o.get("title") + " ";
-                }
-            } catch (Exception e) {
-
-            }
-            try {
-                genderString = best(gender, noisy).get("title").toString()+" ";
-            } catch (Exception e) {
-
-            }
-            try {
-                categoryString = best(category, noisy).get("title").toString();
-            } catch (Exception e) {
-
-            }
-            try {
-                brandString = best(brand, noisy).get("title").toString() + " ";
-            } catch (Exception e) {
-
-            }
-            if (categoryString.isEmpty()) {
-                return noisy;
-            } else if (genderString.isEmpty() && colorString.isEmpty()
-                    && patternString.isEmpty() && brandString.isEmpty()) {
-                return noisy;
-            } else {
-                String all = colorString + genderString + patternString
-                        + brandString + categoryString;
-                return all;
-            }
-        }
-
-        JSONObject best(JSONArray array, String key) throws JSONException {
-            JSONObject best = new JSONObject();
-            int max = 0;
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject object = array.getJSONObject(i);
-                JSONArray objectArray = object.getJSONArray("keyword");
-                int length = 0;
-                for (int j = 0; j < objectArray.length(); j++) {
-                    if (key.contains(objectArray.get(j).toString())) {
-                        length++;
-                    }
-                }
-                if (length > max) {
-                    max = length;
-                    best = object;
-                }
-            }
-            return best;
-        }
-
-        ArrayList<JSONObject> bests(JSONArray array, String key) throws JSONException {
-            ArrayList<JSONObject> arList = new ArrayList<JSONObject>();
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject object = array.getJSONObject(i);
-                JSONArray objectArray = object.getJSONArray("keyword");
-                int length = 0;
-                for (int j = 0; j < objectArray.length(); j++) {
-                    if (key.contains(objectArray.get(j).toString())) {
-                        length++;
-                    }
-                }
-                if (length >= 1) {
-                    arList.add(object);
-                }
-            }
-            return arList;
-        }
-
-
 
         @Override
         protected JSONObject doInBackground(String... params) {
@@ -416,6 +307,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             return Cloudsight.getInstance().askResult(token);
         }
     }
+    /*
     String readFile(String path) throws IOException {
         StringBuilder buf=new StringBuilder();
         InputStream json=getAssets().open(path);
@@ -429,7 +321,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
         }
         in.close();
         return buf.toString();
-    }
+    }*/
 
     @Override
     public void onInit(int status) {
