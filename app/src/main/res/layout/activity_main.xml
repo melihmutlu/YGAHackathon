@@ -63,7 +63,8 @@
             android:background="@null"
             android:contentDescription="Onaylamak için dokunun"
             android:src="@drawable/okbtn"
-            android:visibility="invisible"/>
+            android:clickable="true"
+            android:visibility="visible"/>
 
 
     </LinearLayout>

@@ -13,16 +13,20 @@ import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.InputType;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -35,6 +39,7 @@ public class MainActivity extends AppCompatActivity  implements TextToSpeech.OnI
     private final int REQ_CODE_SPEECH_INPUT = 100;
     private TextToSpeech tts;
     private BluetoothAdapter BTAdapter;
+    private EditText textInput;
     private String product;
     private List productList = new ArrayList<String>();
     private String[] reyons = {"MELIH-PC", "SugaBook"};
@@ -50,7 +55,7 @@ public class MainActivity extends AppCompatActivity  implements TextToSpeech.OnI
 
                     if(device.getName().equals(reyons[i])) {
 
-                        txtSpeechInput.setText("Gidilecek reyon: " + device.getName() + " " + rssi);
+                        txtSpeechInput.setText(Html.fromHtml("<b>Gidilecek reyon\n</b><br> " + product + " " + (70 + rssi)));
 
                         //reyon bulundu unregister..
                         if(rssi > -50) {
@@ -86,6 +91,28 @@ public class MainActivity extends AppCompatActivity  implements TextToSpeech.OnI
         tts = new TextToSpeech(this, this);
         btnSpeak = (ImageView) findViewById(R.id.btnSpeak);
         onayButton = (ImageButton) findViewById(R.id.onayButton);
+        onayButton.setAlpha(0.1f);
+        onayButton.setClickable(false);
+        textInput = (EditText) findViewById(R.id.editText);
+        textInput.setInputType(InputType.TYPE_CLASS_TEXT);
+
+
+        textInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                    product = textInput.getText().toString();
+                    txtSpeechInput.setText(product);
+                    Log.d("TEXT", "Text Edited");
+                    txtSpeechInput.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+                    txtSpeechInput.announceForAccessibility(txtSpeechInput.getText() + " onaylamak için çift dokunun.");
+                    speakOut(txtSpeechInput.getText().toString(), TextToSpeech.QUEUE_FLUSH);
+                    onayButton.setAlpha(1f);
+                    onayButton.setClickable(true);
+                }
+                return false;
+            }
+        });
 
         if(!BTAdapter.isEnabled())
             BTAdapter.enable();
@@ -169,15 +196,26 @@ public class MainActivity extends AppCompatActivity  implements TextToSpeech.OnI
                     txtSpeechInput.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
                     txtSpeechInput.announceForAccessibility(txtSpeechInput.getText() + " onaylamak için çift dokunun.");
                     speakOut(txtSpeechInput.getText().toString(), TextToSpeech.QUEUE_FLUSH);
-
-                    onayButton.setVisibility(View.VISIBLE);
+                    onayButton.setAlpha(1f);
+                    onayButton.setClickable(true);
 
                 }
                 break;
             }
+            default:{
+               break;
+            }
 
         }
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        onayButton.setAlpha(0.1f);
+        onayButton.setClickable(false);
+    }
+
 
     private void speakOut(String text, int mode) {
         tts.speak(text, mode, null);

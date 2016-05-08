@@ -3,7 +3,6 @@ package com.frkn.ygahack;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.Camera;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
