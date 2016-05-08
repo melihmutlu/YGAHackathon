@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -39,7 +41,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
     private Camera mCamera;
     private CameraPreview mCameraPreview;
     private File pictureFile;
-    private ImageView scanner , flashBtn;
+    private ImageView scanner , flashBtn, reqImageView;
     private Animation mAnimation;
     private boolean flash = false ;
     private TextToSpeech tts;
@@ -57,6 +59,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
 
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         scanner = (ImageView) findViewById(R.id.scanner);
+        reqImageView = (ImageView) findViewById(R.id.reqImageView);
         preview.addView(mCameraPreview);
 
 
@@ -157,14 +160,17 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             ByteArrayOutputStream blob = new ByteArrayOutputStream();
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 20, blob);
+            reqImageView.setImageBitmap(bitmap);
+            reqImageView.setRotation(90);
             byte[] bitmapdata = blob.toByteArray();
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(bitmapdata);
                 fos.close();
 
-                mCameraPreview.getHolder().removeCallback(mCameraPreview);
+                //mCameraPreview.getHolder().removeCallback(mCameraPreview);
                 //camera.release();
+                camera.startPreview();
             } catch (FileNotFoundException e) {
 
             } catch (IOException e) {
@@ -200,17 +206,18 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
 
         @Override
         protected void onPreExecute() {
-            scanner.setVisibility(View.VISIBLE);
+            /*scanner.setVisibility(View.VISIBLE);
             mAnimation = new TranslateAnimation(
                     TranslateAnimation.RELATIVE_TO_PARENT, 0f,
                     TranslateAnimation.RELATIVE_TO_PARENT, 0f,
                     TranslateAnimation.RELATIVE_TO_PARENT, -0.5f,
-                    TranslateAnimation.RELATIVE_TO_PARENT, 0.48f);
+            TranslateAnimation.RELATIVE_TO_PARENT, 0.48f);
             mAnimation.setDuration(3500);
             mAnimation.setRepeatCount(-1);
             mAnimation.setRepeatMode(Animation.REVERSE);
             mAnimation.setInterpolator(new LinearInterpolator());
             scanner.setAnimation(mAnimation);
+            */
             super.onPreExecute();
         }
 
@@ -236,7 +243,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
 
         @Override
         protected void onPreExecute() {
-            scanner.setVisibility(View.VISIBLE);
+            /*scanner.setVisibility(View.VISIBLE);
             mAnimation = new TranslateAnimation(
                     TranslateAnimation.RELATIVE_TO_PARENT, 0f,
                     TranslateAnimation.RELATIVE_TO_PARENT, 0f,
@@ -247,6 +254,7 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             mAnimation.setRepeatMode(Animation.REVERSE);
             mAnimation.setInterpolator(new LinearInterpolator());
             scanner.setAnimation(mAnimation);
+            */
             super.onPreExecute();
         }
 
@@ -270,24 +278,23 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
     }
     //Request until recieve a result
     class AskResult extends AsyncTask<String,Void,JSONObject>{
-            String token="";
-            @Override
-            protected void onPostExecute(JSONObject jsonObject) {
-                try {
-                    if(!jsonObject.getString("status").equals("completed")){
-                        Log.d("INFO",jsonObject.toString());
-                        new AskResult().execute(token);}
-                    else {
-                        Log.d("INFO", jsonObject.getString("name"));
-                        Toast.makeText(CameraActivity.this, jsonObject.getString("name"), Toast.LENGTH_LONG).show();
-                        speakOut(jsonObject.getString("name"), TextToSpeech.QUEUE_FLUSH);
-                        String query = null;
+        String token="";
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            try {
+                if(!jsonObject.getString("status").equals("completed")){
+                    Log.d("INFO",jsonObject.toString());
+                    new AskResult().execute(token);}
+                else {
+                    Log.d("INFO", jsonObject.getString("name"));
+                    Toast.makeText(CameraActivity.this, jsonObject.getString("name"), Toast.LENGTH_LONG).show();
+                    speakOut(jsonObject.getString("name"), TextToSpeech.QUEUE_FLUSH);
 
-                    }
-                    super.onPostExecute(jsonObject);
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
+                super.onPostExecute(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
         }
         private void speakOut(String text, int mode) {
@@ -300,20 +307,19 @@ public class CameraActivity extends AppCompatActivity implements TextToSpeech.On
             return Cloudsight.getInstance().askResult(token);
         }
     }
+    /*
     String readFile(String path) throws IOException {
         StringBuilder buf=new StringBuilder();
         InputStream json=getAssets().open(path);
         BufferedReader in=
                 new BufferedReader(new InputStreamReader(json, "UTF-8"));
         String str;
-
         while ((str=in.readLine()) != null) {
             buf.append(str);
-
         }
         in.close();
         return buf.toString();
-    }
+    }*/
 
     @Override
     public void onInit(int status) {
