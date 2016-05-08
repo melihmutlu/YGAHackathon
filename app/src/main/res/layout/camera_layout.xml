@@ -2,12 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="horizontal" >
+    android:orientation="horizontal">
 
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:contentDescription="Kamera açık"
         />
 
     <ImageView
@@ -15,8 +16,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/flashBtn"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:layout_margin="10dp"
+        android:contentDescription="Flaş açma kapama"
         android:src="@drawable/ic_flash_off_white_36dp"/>
 
     <ImageView
@@ -25,6 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
+        android:contentDescription="Ürünü tanı"
         android:src="@drawable/selector"
         android:layout_alignParentBottom="true"/>
 
